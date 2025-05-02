@@ -92,150 +92,173 @@ export default function DashboardPage() {
     router.push('/login');
   };
 
+  const handleCopyLink = (linkAbsensi: string) => {
+    const fullLink = `http://localhost:3000/absen/${linkAbsensi}`;
+    navigator.clipboard.writeText(fullLink)
+      .then(() => {
+        alert("Link berhasil disalin!");
+      })
+      .catch(() => {
+        alert("Gagal menyalin link.");
+      });
+  };
+
   return (
     <div className="d-flex">
       <aside className="bg-navy text-white p-4 flex-shrink-0" style={{ width: "250px", minHeight: "100vh", backgroundColor: "#002147", display: "flex", flexDirection: "column" }}>
-      <div className="d-flex align-items-center mb-4">
-        <img src="/images/Logo-Unhas.png" alt="Logo" style={{ width: "60px", height: "auto" }} />
-        <h6 className="ms-2" style={{ fontSize: "0.9rem" }}>Manajemen Rapat Universitas Hasanuddin</h6>
-      </div>
+        <div className="d-flex align-items-center mb-4">
+          <img src="/images/Logo-Unhas.png" alt="Logo" style={{ width: "60px", height: "auto" }} />
+          <h6 className="ms-2" style={{ fontSize: "0.9rem" }}>Manajemen Rapat Universitas Hasanuddin</h6>
+        </div>
 
-      <nav>
-        <ul className="nav flex-column gap-2">
-          {[
-            { label: "Dashboard", path: "/dashboard" },
-            { label: "History", path: "/dashboard/history" },
-          ].map((item, index) => (
-            <li key={index} className="nav-item">
-              <button
-                className={`btn btn-link text-white w-100 text-start ${pathname === item.path ? 'bg-primary' : ''}`} // Check if the path matches
-                style={{ textDecoration: "none" }}
-                onClick={() => router.push(item.path)}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#004080"}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-              >
-                {item.label}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </nav>
+        <nav>
+          <ul className="nav flex-column gap-2">
+            {[
+              { label: "Dashboard", path: "/dashboard" },
+              { label: "History", path: "/dashboard/history" },
+            ].map((item, index) => (
+              <li key={index} className="nav-item">
+                <button
+                  className={`btn btn-link text-white w-100 text-start ${pathname === item.path ? 'bg-primary' : ''}`}
+                  style={{ textDecoration: "none" }}
+                  onClick={() => router.push(item.path)}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#004080"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                >
+                  {item.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-      <div className="mt-auto">
-        <button className="btn btn-danger w-100" onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
-    </aside>
-
-
-
-      {/* Main Content */}
-      <main className="flex-grow-1 p-5 bg-light">
-      <div className="container mt-5">
-      </div>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 style={{ color: "black" }}>Dashboard Admin</h2>
-        <div className="d-flex gap-2">
-          <button className="btn btn-success" onClick={() => router.push('/dashboard/create')}>
-            + Buat Rapat Baru
-          </button>
-          <button className="btn btn-danger" onClick={handleLogout}>
+        <div className="mt-auto">
+          <button className="btn btn-danger w-100" onClick={handleLogout}>
             Logout
           </button>
         </div>
-      </div>
+      </aside>
 
-      <div className="mb-4">
-        <input
-        type="text"
-        className="form-control"
-        placeholder="Cari judul rapat..."
-        value={searchTerm}
-        onChange={handleSearch}
-        />
-      </div>
-
-      {filteredRapats.length === 0 ? (
-        <div className="alert alert-warning text-center">Tidak ada rapat yang ditemukan.</div>
-      ) : (
-        <div className="row">
-        {filteredRapats.map((rapat) => (
-          <div key={rapat.id} className="col-md-6 col-lg-4 mb-4">
-          <div className="card shadow-sm">
-            <div className="card-body">
-            <h5 className="card-title text-primary">{rapat.judul_rapat}</h5>
-            <p className="card-text text-muted">
-              {rapat.tanggal_rapat} - {rapat.lokasi_rapat}
-            </p>
-            <div className="d-flex flex-wrap gap-2 mt-3">
-              <button
-              className="btn btn-outline-primary btn-sm"
-              onClick={() => router.push(`/dashboard/rapat/${rapat.id}/absensi`)}
-              >
-              Lihat Absensi
+      {/* Main Content */}
+      <main className="flex-grow-1 p-5 bg-light">
+        <div className="container mt-5">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h2 style={{ color: "black" }}>Dashboard Admin</h2>
+            <div className="d-flex gap-2">
+              <button className="btn btn-success" onClick={() => router.push('/dashboard/create')}>
+                + Buat Rapat Baru
               </button>
-              <a
-              href={`http://localhost:8000/api/rapat/${rapat.id}/rekap`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-outline-success btn-sm"
-              >
-              Rekap PDF
-              </a>
-              <button
-              className="btn btn-outline-warning btn-sm"
-              onClick={() => router.push(`/dashboard/rapat/${rapat.id}/edit`)}
-              >
-              Edit
-              </button>
-              <button
-              className="btn btn-outline-danger btn-sm"
-              onClick={() => handleDelete(rapat.id)}
-              >
-              Hapus
-              </button>
-              <button
-              className="btn btn-outline-info btn-sm"
-              onClick={() => setSelectedRapat(rapat)}
-              >
-              Tampilkan QR Code
+              <button className="btn btn-danger" onClick={handleLogout}>
+                Logout
               </button>
             </div>
-            </div>
           </div>
-          </div>
-        ))}
-        </div>
-      )}
 
-      {/* Modal QR Code */}
-      {selectedRapat && (
-        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content p-3">
-              <div className="modal-header">
-                <h5 className="modal-title">QR Code - {selectedRapat.judul_rapat}</h5>
-                <button type="button" className="btn-close" onClick={() => setSelectedRapat(null)}></button>
+          <div className="mb-4">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Cari judul rapat..."
+              value={searchTerm}
+              onChange={handleSearch}
+            />
+          </div>
+
+          {filteredRapats.length === 0 ? (
+            <div className="alert alert-warning text-center">Tidak ada rapat yang ditemukan.</div>
+          ) : (
+            <div className="row">
+              {filteredRapats.map((rapat) => (
+                <div key={rapat.id} className="col-md-6 col-lg-4 mb-4">
+                  <div className="card shadow-sm">
+                    <div className="card-body">
+                      <h5 className="card-title text-primary">{rapat.judul_rapat}</h5>
+                      <p className="card-text text-muted">
+                        {rapat.tanggal_rapat} - {rapat.lokasi_rapat}
+                      </p>
+                      <div className="d-flex flex-wrap gap-2 mt-3">
+                        <button
+                          className="btn btn-outline-primary btn-sm"
+                          onClick={() => router.push(`/dashboard/rapat/${rapat.id}/absensi`)}
+                        >
+                          Lihat Absensi
+                        </button>
+                        <a
+                          href={`http://localhost:8000/api/rapat/${rapat.id}/rekap`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-outline-success btn-sm"
+                        >
+                          Rekap PDF
+                        </a>
+                        <button
+                          className="btn btn-outline-warning btn-sm"
+                          onClick={() => router.push(`/dashboard/rapat/${rapat.id}/edit`)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="btn btn-outline-danger btn-sm"
+                          onClick={() => handleDelete(rapat.id)}
+                        >
+                          Hapus
+                        </button>
+                        <button
+                          className="btn btn-outline-info btn-sm"
+                          onClick={() => setSelectedRapat(rapat)}
+                        >
+                          Tampilkan QR Code
+                        </button>
+
+                        {/* Tombol Copy Link */}
+                        <button
+                          className="btn btn-outline-secondary btn-sm"
+                          onClick={() => handleCopyLink(rapat.link_absensi)}
+                        >
+                          Copy Link
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Modal QR Code */}
+          {selectedRapat && (
+            <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+              <div className="modal-dialog modal-dialog-centered">
+                <div className="modal-content p-3">
+                  <div className="modal-header">
+                    <h5 className="modal-title">QR Code - {selectedRapat.judul_rapat}</h5>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={() => setSelectedRapat(null)}
+                    ></button>
+                  </div>
+                  <div className="modal-body text-center">
+                    <QRCodeCanvas
+                      id={`qrcode-${selectedRapat.id}`}
+                      value={`http://localhost:3000/absen/${selectedRapat.link_absensi}`}
+                      size={200}
+                      level="H"
+                      includeMargin
+                    />
+                    <br />
+                    <button
+                      className="btn btn-primary mt-3"
+                      onClick={() => handleDownload(selectedRapat.id)}
+                    >
+                      Download QR Code
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="modal-body text-center">
-                <QRCodeCanvas
-                  id={`qrcode-${selectedRapat.id}`}
-                  value={`http://localhost:3000/absen/${selectedRapat.link_absensi}`}
-                  size={200}
-                  level="H"
-                  includeMargin
-                />
-                <br />
-                <button className="btn btn-primary mt-3" onClick={() => handleDownload(selectedRapat.id)}>
-                  Download QR Code
-                </button>
-              </div>
             </div>
-          </div>
+          )}
         </div>
-      )}
-      
       </main>
     </div>
   );
