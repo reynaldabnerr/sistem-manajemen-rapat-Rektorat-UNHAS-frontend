@@ -149,9 +149,6 @@ export default function DashboardPage() {
               <button className="btn btn-success" onClick={() => router.push('/dashboard/create')}>
                 + Buat Rapat Baru
               </button>
-              <button className="btn btn-danger" onClick={handleLogout}>
-                Logout
-              </button>
             </div>
           </div>
 
