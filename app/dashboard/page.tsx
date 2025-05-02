@@ -8,9 +8,8 @@ import { QRCodeCanvas } from 'qrcode.react';
 export default function DashboardPage() {
   const [rapats, setRapats] = useState<any[]>([]);
   const [filteredRapats, setFilteredRapats] = useState<any[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(""); // 🔥 State untuk pencarian
   const [selectedRapat, setSelectedRapat] = useState<any>(null);
-  const [copySuccess, setCopySuccess] = useState(""); // ✅ State untuk notifikasi copy
   const router = useRouter();
 
   useEffect(() => {
@@ -29,7 +28,7 @@ export default function DashboardPage() {
           }
         });
         setRapats(res.data);
-        setFilteredRapats(res.data);
+        setFilteredRapats(res.data); // Set initial filtered rapats
       } catch (err) {
         console.error(err);
         router.push('/login');
@@ -54,7 +53,9 @@ export default function DashboardPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Yakin ingin menghapus rapat ini?")) return;
+    const confirmDelete = confirm("Yakin ingin menghapus rapat ini?");
+    if (!confirmDelete) return;
+
     try {
       const token = localStorage.getItem('token');
       await axios.delete(`http://localhost:8000/api/rapat/${id}`, {
@@ -83,28 +84,46 @@ export default function DashboardPage() {
     document.body.removeChild(downloadLink);
   };
 
-  const handleCopyLink = (linkAbsensi: string) => {
-    const fullLink = `http://localhost:3000/absen/${linkAbsensi}`;
-    navigator.clipboard.writeText(fullLink)
-      .then(() => {
-        setCopySuccess("Link berhasil disalin!");
-        setTimeout(() => setCopySuccess(""), 2000);
-      })
-      .catch(() => {
-        setCopySuccess("Gagal menyalin link.");
-        setTimeout(() => setCopySuccess(""), 2000);
-      });
-  };
-
   const handleLogout = () => {
     localStorage.removeItem('token');
     router.push('/login');
   };
 
   return (
-    <div className="container mt-5">
+    <div className="d-flex">
+      <aside className="bg-navy text-white p-4 flex-shrink-0" style={{ width: "250px", minHeight: "100vh", backgroundColor: "#002147" }}>
+      {/* Logo and Text Side by Side */}
+      <div className="d-flex align-items-center mb-4">
+        <img
+          src="/images/Logo-Unhas.png" // Path ke gambar logo Anda
+          alt="Logo"
+          style={{ width: "60px", height: "auto" }} // Ukuran logo
+        />
+        <h6 className="ms-2" style={{ fontSize: "0.9rem" }}>Manajemen Rapat Universitas Hasanuddin</h6>
+      </div>
+
+      <nav>
+        <ul className="nav flex-column gap-2">
+          <li className="nav-item">
+        <button className="btn btn-link text-white w-100 text-start" onClick={() => router.push('/dashboard')}>
+          Dashboard
+        </button>
+          </li>
+          <li className="nav-item">
+        <button className="btn btn-link text-white w-100 text-start" onClick={handleLogout}>
+          Logout
+        </button>
+          </li>
+        </ul>
+      </nav>
+        </aside>
+
+      {/* Main Content */}
+      <main className="flex-grow-1 p-5 bg-light">
+      <div className="container mt-5">
+      </div>
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Dashboard Admin</h2>
+        <h2 style={{ color: "black" }}>Dashboard Admin</h2>
         <div className="d-flex gap-2">
           <button className="btn btn-success" onClick={() => router.push('/dashboard/create')}>
             + Buat Rapat Baru
@@ -115,61 +134,66 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="input-group mb-4">
+      <div className="mb-4">
         <input
-          type="text"
-          className="form-control"
-          placeholder="Cari judul rapat..."
-          value={searchTerm}
-          onChange={handleSearch}
+        type="text"
+        className="form-control"
+        placeholder="Cari judul rapat..."
+        value={searchTerm}
+        onChange={handleSearch}
         />
       </div>
 
       {filteredRapats.length === 0 ? (
-        <p>Tidak ada rapat yang ditemukan.</p>
+        <div className="alert alert-warning text-center">Tidak ada rapat yang ditemukan.</div>
       ) : (
-        <div className="list-group">
-          {filteredRapats.map((rapat) => (
-            <div key={rapat.id} className="list-group-item mb-4">
-              <h5>{rapat.judul_rapat}</h5>
-              <p>{rapat.tanggal_rapat} - {rapat.lokasi_rapat}</p>
-
-              <div className="d-flex gap-2 mt-2 flex-wrap">
-                <button className="btn btn-outline-primary btn-sm" onClick={() => router.push(`/dashboard/rapat/${rapat.id}/absensi`)}>
-                  Lihat Absensi
-                </button>
-
-                <a
-                  href={`http://localhost:8000/api/rapat/${rapat.id}/rekap`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-outline-success btn-sm"
-                >
-                  Rekap PDF
-                </a>
-
-                <button className="btn btn-outline-warning btn-sm" onClick={() => router.push(`/dashboard/rapat/${rapat.id}/edit`)}>
-                  Edit
-                </button>
-
-                <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(rapat.id)}>
-                  Hapus
-                </button>
-
-                <button className="btn btn-outline-info btn-sm" onClick={() => setSelectedRapat(rapat)}>
-                  Tampilkan QR Code
-                </button>
-
-                {/* 🔥 Tombol Copy Link */}
-                <button
-                  className="btn btn-outline-secondary btn-sm"
-                  onClick={() => handleCopyLink(rapat.link_absensi)}
-                >
-                  Copy Link
-                </button>
-              </div>
+        <div className="row">
+        {filteredRapats.map((rapat) => (
+          <div key={rapat.id} className="col-md-6 col-lg-4 mb-4">
+          <div className="card shadow-sm">
+            <div className="card-body">
+            <h5 className="card-title text-primary">{rapat.judul_rapat}</h5>
+            <p className="card-text text-muted">
+              {rapat.tanggal_rapat} - {rapat.lokasi_rapat}
+            </p>
+            <div className="d-flex flex-wrap gap-2 mt-3">
+              <button
+              className="btn btn-outline-primary btn-sm"
+              onClick={() => router.push(`/dashboard/rapat/${rapat.id}/absensi`)}
+              >
+              Lihat Absensi
+              </button>
+              <a
+              href={`http://localhost:8000/api/rapat/${rapat.id}/rekap`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-outline-success btn-sm"
+              >
+              Rekap PDF
+              </a>
+              <button
+              className="btn btn-outline-warning btn-sm"
+              onClick={() => router.push(`/dashboard/rapat/${rapat.id}/edit`)}
+              >
+              Edit
+              </button>
+              <button
+              className="btn btn-outline-danger btn-sm"
+              onClick={() => handleDelete(rapat.id)}
+              >
+              Hapus
+              </button>
+              <button
+              className="btn btn-outline-info btn-sm"
+              onClick={() => setSelectedRapat(rapat)}
+              >
+              Tampilkan QR Code
+              </button>
             </div>
-          ))}
+            </div>
+          </div>
+          </div>
+        ))}
         </div>
       )}
 
@@ -199,13 +223,8 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
-
-      {/* ✅ Notifikasi Copy */}
-      {copySuccess && (
-        <div className="toast show position-fixed bottom-0 end-0 m-3 bg-success text-white p-3">
-          {copySuccess}
-        </div>
-      )}
+      
+      </main>
     </div>
   );
 }

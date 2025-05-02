@@ -1,12 +1,12 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #ffffff; /* Ganti latar belakang putih untuk tema terang */
+  --foreground: #000000; /* Ganti warna teks menjadi hitam untuk tema terang */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff; /* Pastikan latar belakang tetap putih pada tema gelap */
+    --foreground: #000000; /* Pastikan teks tetap hitam pada tema gelap */
   }
 }
 
