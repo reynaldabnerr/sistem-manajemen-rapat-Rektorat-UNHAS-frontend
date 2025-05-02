@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import axios from 'axios';
 import { QRCodeCanvas } from 'qrcode.react';
 
@@ -11,6 +11,9 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState(""); // 🔥 State untuk pencarian
   const [selectedRapat, setSelectedRapat] = useState<any>(null);
   const router = useRouter();
+  const pathname = usePathname();
+
+  const [selected, setSelected] = useState('');
 
   useEffect(() => {
     const fetchRapats = async () => {
@@ -91,32 +94,41 @@ export default function DashboardPage() {
 
   return (
     <div className="d-flex">
-      <aside className="bg-navy text-white p-4 flex-shrink-0" style={{ width: "250px", minHeight: "100vh", backgroundColor: "#002147" }}>
-      {/* Logo and Text Side by Side */}
+      <aside className="bg-navy text-white p-4 flex-shrink-0" style={{ width: "250px", minHeight: "100vh", backgroundColor: "#002147", display: "flex", flexDirection: "column" }}>
       <div className="d-flex align-items-center mb-4">
-        <img
-          src="/images/Logo-Unhas.png" // Path ke gambar logo Anda
-          alt="Logo"
-          style={{ width: "60px", height: "auto" }} // Ukuran logo
-        />
+        <img src="/images/Logo-Unhas.png" alt="Logo" style={{ width: "60px", height: "auto" }} />
         <h6 className="ms-2" style={{ fontSize: "0.9rem" }}>Manajemen Rapat Universitas Hasanuddin</h6>
       </div>
 
       <nav>
         <ul className="nav flex-column gap-2">
-          <li className="nav-item">
-        <button className="btn btn-link text-white w-100 text-start" onClick={() => router.push('/dashboard')}>
-          Dashboard
-        </button>
-          </li>
-          <li className="nav-item">
-        <button className="btn btn-link text-white w-100 text-start" onClick={handleLogout}>
-          Logout
-        </button>
-          </li>
+          {[
+            { label: "Dashboard", path: "/dashboard" },
+            { label: "History", path: "/dashboard/history" },
+          ].map((item, index) => (
+            <li key={index} className="nav-item">
+              <button
+                className={`btn btn-link text-white w-100 text-start ${pathname === item.path ? 'bg-primary' : ''}`} // Check if the path matches
+                style={{ textDecoration: "none" }}
+                onClick={() => router.push(item.path)}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#004080"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+              >
+                {item.label}
+              </button>
+            </li>
+          ))}
         </ul>
       </nav>
-        </aside>
+
+      <div className="mt-auto">
+        <button className="btn btn-danger w-100" onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+
 
       {/* Main Content */}
       <main className="flex-grow-1 p-5 bg-light">
