@@ -8,12 +8,11 @@ import { QRCodeCanvas } from 'qrcode.react';
 export default function DashboardPage() {
   const [rapats, setRapats] = useState<any[]>([]);
   const [filteredRapats, setFilteredRapats] = useState<any[]>([]);
-  const [searchTerm, setSearchTerm] = useState(""); // 🔥 State untuk pencarian
+  const [searchTerm, setSearchTerm] = useState(""); 
   const [selectedRapat, setSelectedRapat] = useState<any>(null);
+  const [copySuccess, setCopySuccess] = useState(""); // State for copy notification
   const router = useRouter();
   const pathname = usePathname();
-
-  const [selected, setSelected] = useState('');
 
   useEffect(() => {
     const fetchRapats = async () => {
@@ -31,7 +30,7 @@ export default function DashboardPage() {
           }
         });
         setRapats(res.data);
-        setFilteredRapats(res.data); // Set initial filtered rapats
+        setFilteredRapats(res.data);
       } catch (err) {
         console.error(err);
         router.push('/login');
@@ -96,10 +95,12 @@ export default function DashboardPage() {
     const fullLink = `http://localhost:3000/absen/${linkAbsensi}`;
     navigator.clipboard.writeText(fullLink)
       .then(() => {
-        alert("Link berhasil disalin!");
+        setCopySuccess("Link berhasil disalin!");
+        setTimeout(() => setCopySuccess(""), 2000); // Hide the toast after 2 seconds
       })
       .catch(() => {
-        alert("Gagal menyalin link.");
+        setCopySuccess("Gagal menyalin link.");
+        setTimeout(() => setCopySuccess(""), 2000); // Hide the toast after 2 seconds
       });
   };
 
@@ -259,6 +260,18 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+
+        {/* Toast Notification for Copy Link Success */}
+        {copySuccess && (
+          <div
+            className="toast show position-fixed bottom-0 end-0 m-3 bg-success text-white p-3"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+          >
+            {copySuccess}
+          </div>
+        )}
       </main>
     </div>
   );
