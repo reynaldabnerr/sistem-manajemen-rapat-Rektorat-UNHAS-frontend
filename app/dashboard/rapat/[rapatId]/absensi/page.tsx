@@ -3,111 +3,116 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
-import React from 'react';
 
-export default function EditRapatPage() {
-  const { id } = useParams();
+export default function AbsensiPage() {
+  const { rapatId } = useParams();
   const router = useRouter();
-  const [form, setForm] = useState({
-    judul_rapat: '',
-    tanggal_rapat: '',
-    lokasi_rapat: '',
-    deskripsi_rapat: ''
-  });
+  const [absensis, setAbsensis] = useState<any[]>([]);
+  const [judulRapat, setJudulRapat] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  const [showModal, setShowModal] = useState(false);
+
+  const [namaPeserta, setNamaPeserta] = useState('');
+  const [nipPeserta, setNipPeserta] = useState('');
+  const [statusKehadiran, setStatusKehadiran] = useState('Hadir');
 
   useEffect(() => {
-    const fetchRapat = async () => {
-      const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:8000/api/rapat/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json'
-        }
-      });
-      setForm(res.data);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        const absensiRes = await axios.get(`http://localhost:8000/api/rapat/${rapatId}/absensi`, {
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
+        });
+        setAbsensis(absensiRes.data);
+
+        const rapatRes = await axios.get(`http://localhost:8000/api/rapat/${rapatId}`, {
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
+        });
+        setJudulRapat(rapatRes.data.judul_rapat);
+
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setLoading(false);
+      }
     };
 
-    fetchRapat();
-  }, [id]);
+    fetchData();
+  }, [rapatId, router]);
 
-  const handleChange = (e: any) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleDelete = async (absensiId: number) => {
+    if (!confirm('Yakin ingin menghapus data ini?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`http://localhost:8000/api/absensi/${absensiId}`, {
+        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
+      });
+      setAbsensis(prev => prev.filter(a => a.id !== absensiId));
+    } catch (err) {
+      console.error('Gagal menghapus:', err);
+    }
   };
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    const token = localStorage.getItem('token');
-    await axios.put(`http://localhost:8000/api/rapat/${id}`, form, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json'
-      }
-    });
-    router.push('/dashboard');
-  };
+  if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="container mt-5" style={{ color: 'black' }}>
-      <h2>Edit Rapat</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label>Judul Rapat</label>
-          <input
-            type="text"
-            className="form-control"
-            name="judul_rapat"
-            value={form.judul_rapat}
-            onChange={handleChange}
-            style={{ color: 'black' }}
-          />
-        </div>
-        <div className="mb-3">
-          <label>Tanggal Rapat</label>
-          <input
-            type="date"
-            className="form-control"
-            name="tanggal_rapat"
-            value={form.tanggal_rapat}
-            onChange={handleChange}
-            style={{ color: 'black' }}
-          />
-        </div>
-        <div className="mb-3">
-          <label>Lokasi Rapat</label>
-          <input
-            type="text"
-            className="form-control"
-            name="lokasi_rapat"
-            value={form.lokasi_rapat}
-            onChange={handleChange}
-            style={{ color: 'black' }}
-          />
-        </div>
-        <div className="mb-3">
-          <label>Deskripsi</label>
-          <textarea
-            className="form-control"
-            name="deskripsi_rapat"
-            value={form.deskripsi_rapat}
-            onChange={handleChange}
-            style={{ color: 'black' }}
-          />
-        </div>
+    <div className="container mt-5">
+      <h2 className="mb-4" style={{ color: 'black' }}>Daftar Absensi Rapat : {judulRapat}</h2>
 
-        {/* Tombol Kembali */}
-        <div className="d-flex justify-content-between mb-3">
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => router.back()}
-          >
-            Kembali
-          </button>
-          <button type="submit" className="btn btn-primary">
-            Update Rapat
-          </button>
-        </div>
-      </form>
+      {/* Tombol Kembali */}
+      <button
+        className="btn btn-secondary mb-4"
+        onClick={() => router.back()} // Tombol untuk kembali ke halaman sebelumnya
+      >
+        Kembali
+      </button>
+
+      {absensis.length === 0 ? (
+        <p>Belum ada peserta absensi.</p>
+      ) : (
+        <table className="table table-bordered">
+          <thead className="table-light">
+            <tr>
+              <th>Nama</th>
+              <th>NIP</th>
+              <th>Status Kehadiran</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {absensis.map((a, i) => (
+              <tr key={i}>
+                <td>{a.nama_peserta}</td>
+                <td>{a.nip_peserta}</td>
+                <td>{a.status_kehadiran}</td>
+                <td>
+                  <div className="d-flex gap-2">
+                    <button
+                      className="btn btn-warning btn-sm"
+                      onClick={() => router.push(`/dashboard/absensi/${a.id}/edit`)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDelete(a.id)}
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }
