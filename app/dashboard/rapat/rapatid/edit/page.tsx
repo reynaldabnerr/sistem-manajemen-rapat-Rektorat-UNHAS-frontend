@@ -98,7 +98,7 @@ export default function EditRapatPage() {
         <div className="d-flex justify-content-between mb-3">
           <button
             type="button"
-            className="btn btn-danger"
+            className="btn btn-secondary"
             onClick={() => router.back()}
           >
             Kembali
