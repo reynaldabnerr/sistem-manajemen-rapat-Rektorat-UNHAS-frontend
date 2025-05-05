@@ -13,6 +13,10 @@ export default function DashboardPage() {
   const [copySuccess, setCopySuccess] = useState(""); // State for copy notification
   const router = useRouter();
   const pathname = usePathname();
+  const [role, setRole] = useState<string | null>(null);
+  useEffect(() => {
+    setRole(localStorage.getItem('role'));
+  }, []);
 
   useEffect(() => {
     const fetchRapats = async () => {
@@ -106,25 +110,46 @@ export default function DashboardPage() {
 
   return (
     <div className="d-flex">
-      <aside className="bg-navy text-white p-4 flex-shrink-0" style={{ width: "250px", minHeight: "100vh", backgroundColor: "#002147", display: "flex", flexDirection: "column" }}>
+      <aside
+        className="bg-navy text-white p-4 flex-shrink-0"
+        style={{
+          width: "250px",
+          minHeight: "100vh",
+          backgroundColor: "#002147",
+          display: "flex",
+          flexDirection: "column"
+        }}
+      >
         <div className="d-flex align-items-center mb-4">
-          <img src="/images/Logo-Unhas.png" alt="Logo" style={{ width: "60px", height: "auto" }} />
-          <h6 className="ms-2" style={{ fontSize: "0.9rem" }}>Manajemen Rapat Universitas Hasanuddin</h6>
+          <img
+            src="/images/Logo-Unhas.png"
+            alt="Logo"
+            style={{ width: "60px", height: "auto" }}
+          />
+          <h6 className="ms-2" style={{ fontSize: "0.9rem" }}>
+            Manajemen Rapat Unhas
+          </h6>
         </div>
 
         <nav>
           <ul className="nav flex-column gap-2">
             {[
               { label: "Dashboard", path: "/dashboard" },
-              { label: "History", path: "/dashboard/history" },
-            ].map((item, index) => (
-              <li key={index} className="nav-item">
+              { label: "History",   path: "/dashboard/history" },
+              // kondisional
+              ...(role === "superadmin"
+                ? [{ label: "Manage Admin", path: "/dashboard/superadmin" }]
+                : []),
+            ].map((item, i) => (
+              <li key={i} className="nav-item">
                 <button
-                  className={`btn btn-link text-white w-100 text-start ${pathname === item.path ? 'bg-primary' : ''}`}
+                  className={`btn btn-link text-white w-100 text-start ${
+                    pathname === item.path ? 'bg-primary' : ''
+                  }`}
                   style={{ textDecoration: "none" }}
                   onClick={() => router.push(item.path)}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#004080"}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                  onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#004080")}
+                  onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
                 >
                   {item.label}
                 </button>
