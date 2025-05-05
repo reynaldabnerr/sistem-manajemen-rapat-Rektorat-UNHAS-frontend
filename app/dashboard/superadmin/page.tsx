@@ -16,6 +16,7 @@ export default function SuperAdminPage() {
   const [editId, setEditId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState({ name: "", email: "" });
   const [successMsg, setSuccessMsg] = useState("");
+  
 
   useEffect(() => {
     // hanya dijalankan di client
